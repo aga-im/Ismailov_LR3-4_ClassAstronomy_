@@ -102,4 +102,13 @@ std::vector<Planet> sortPlanetsByMass() {
     return sortedPlanets;
 }
 
-#endif 
+// Функция сортировки и отображения планет по массе
+void sortAndDisplayPlanets() {
+    auto sorted = sortPlanetsByMass();
+    std::cout << "Planets sorted by mass:\n";
+    for (const auto& planet : sorted) {
+        planet.display();
+    }
+}
+
+#endif // METHODS_H

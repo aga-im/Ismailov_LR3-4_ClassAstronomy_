@@ -2,113 +2,104 @@
 #define ISMAILOV_LR34_METHODS_H
 
 #include "Ismailov_LR34_Planet.h"
-#include <vector>
 #include <algorithm>
-#include <functional>
 
-// Глобальный вектор объектов
-std::vector<Planet> planets;
+vector<Planet> DB_Planet;
 
-// Функция проверки корректности ввода числа
-bool isValidNumber(const std::string& str) {
+const string LIST {"planet.txt"};
+
+bool UserInput(const string& input) {
+    if (input.empty()) return false;
     try {
-        size_t pos;
-        std::stod(str, &pos);
-        return pos == str.length();
-    } catch (...) {
-        return false;
+        int number = stoi(input);
+        if (number < 0) return false;
     }
+    catch (...) { return false; }
+    return true;
 }
 
-// Функция ввода числа с проверкой
-double inputNumber(const std::string& prompt) {
-    std::string input;
-    while (true) {
-        std::cout << prompt;
-        std::cin >> input;
-        if (isValidNumber(input)) {
-            return std::stod(input);
+bool UserStringInput(const string& input) {
+    return !input.empty();
+}
+
+function<void()> EnterNumber(int& varLink, string label) {
+    return [&varLink, label]() {
+        string raw_input;
+        cout << label << " = ";
+        getline(cin, raw_input);
+        while (!UserInput(raw_input)) {
+            cout << label << " = ";
+            getline(cin, raw_input);
         }
-        std::cout << "Invalid input. Try again.\n";
+        varLink = stoi(raw_input);
+    };
+}
+
+function<void()> EnterString(string& varLink, string label) {
+    return [&varLink, label]() {
+        cout << label << " = ";
+        getline(cin, varLink);
+        while (!UserStringInput(varLink)) {
+            cout << label << " = ";
+            getline(cin, varLink);
+        }
+    };
+}
+
+void addPlanetToDB() {
+    DB_Planet.emplace_back(*Planet::input());
+}
+
+function<void()> createPlanetsFromFile(string filename) {
+    return [filename]() {
+        ifstream file(filename);
+        if (!file.is_open()) {
+            cerr << "Failed to open file: " << filename << endl;
+            return;
+        }
+        string line;
+        while (getline(file, line)) {
+            stringstream ss(line);
+            string name;
+            int mass, radius;
+            vector<int> years;
+            getline(ss, name, ' ');
+            ss >> mass;
+            ss.ignore();
+            ss >> radius;
+            ss.ignore();
+            int year;
+            while (ss >> year) {
+                years.push_back(year);
+                if (ss.peek() == ',') ss.ignore();
+            }
+            Planet planet(name, mass, radius, years);
+            DB_Planet.emplace_back(planet);
+        }
+        cout << "Planets loaded from file" << endl;
+        file.close();
+    };
+}
+
+void showPlanets() {
+    for (const auto& planet : DB_Planet) {
+        planet.show();
     }
 }
 
-// Функция отображения всех объектов
-void showAllPlanets() {
-    if (planets.empty()) {
-        std::cout << "No planets in the list.\n";
-        return;
-    }
-    for (const auto& planet : planets) {
-        planet.display();
-    }
-}
-
-// Функция создания планеты с помощью конструктора по умолчанию
-void createPlanetDefault() {
-    Planet planet;
-    planets.push_back(planet);
-    std::cout << "Created planet with default constructor:\n";
-    planet.display();
-}
-
-// Функция создания планеты с помощью параметризованного конструктора
-void createPlanetParameterized() {
-    std::string name;
-    double mass, radius;
-    int numDates;
-    std::vector<std::string> dates;
-
-    std::cout << "Enter name: ";
-    std::cin >> name;
-    mass = inputNumber("Enter mass (kg): ");
-    radius = inputNumber("Enter radius (m): ");
-    std::cout << "Enter number of research dates: ";
-    std::cin >> numDates;
-    for (int i = 0; i < numDates; ++i) {
-        std::string date;
-        std::cout << "Enter research date " << i + 1 << ": ";
-        std::cin >> date;
-        dates.push_back(date);
-    }
-    Planet planet(name, mass, radius, dates);
-    planets.push_back(planet);
-    std::cout << "Created planet with parameterized constructor:\n";
-    planet.display();
-}
-
-// Функция для вычисления ускорения свободного падения
-void calculateGravityForPlanet() {
-    if (planets.empty()) {
-        std::cout << "No planets to calculate gravity.\n";
-        return;
-    }
-    std::cout << "Select planet (index 0 to " << planets.size() - 1 << "): ";
-    int index;
-    std::cin >> index;
-    if (index >= 0 && index < planets.size()) {
-        std::cout << "Gravity on " << planets[index].getName() << ": " << planets[index].calculateGravity() << " m/s^2\n";
-    } else {
-        std::cout << "Invalid index.\n";
-    }
-}
-
-// Функция сортировки планет по массе
-std::vector<Planet> sortPlanetsByMass() {
-    std::vector<Planet> sortedPlanets = planets;
-    std::sort(sortedPlanets.begin(), sortedPlanets.end(), [](const Planet& a, const Planet& b) {
+vector<Planet> getSortedPlanetsByMass() {
+    vector<Planet> sorted = DB_Planet;
+    sort(sorted.begin(), sorted.end(), [](const Planet& a, const Planet& b) {
         return a.getMass() < b.getMass();
     });
-    return sortedPlanets;
+    return sorted;
 }
 
-// Функция сортировки и отображения планет по массе
-void sortAndDisplayPlanets() {
-    auto sorted = sortPlanetsByMass();
-    std::cout << "Planets sorted by mass:\n";
+void showSortedPlanetsByMass() {
+    vector<Planet> sorted = getSortedPlanetsByMass();
     for (const auto& planet : sorted) {
-        planet.display();
+        planet.show();
     }
 }
 
-#endif // METHODS_H
+#endif

@@ -1,38 +1,45 @@
-#include "Ismailov_LR34_Planet.h"
-#include "Ismailov_LR34_Methods.h"
+#include "Ismailov_LR34_Planet.cpp"
 #include <map>
-#include <functional>
+#include <iostream>
+
+using namespace std;
+
+struct MenuItem {
+    string title;
+    function<void()> action;
+};
 
 int main() {
-    std::map<int, std::pair<std::string, std::function<void()>>> menu = {
-        {1, {"Create Planet (Default Constructor)", createPlanetDefault}},
-        {2, {"Create Planet (Parameterized Constructor)", createPlanetParameterized}},
-        {3, {"Show All Planets", showAllPlanets}},
-        {4, {"Calculate Gravity for a Planet", calculateGravityForPlanet}},
-        {5, {"Sort Planets by Mass", sortAndDisplayPlanets}}
+    setlocale(LC_ALL,"Russian");
+    map<int, MenuItem> menu = {
+        {1, {"Show Planets", createPlanetsFromFile(LIST)}},
+        {2, {"Add Planet", addPlanetToDB}},
+        {3, {"Show All Planets", showPlanets}},
+        {4, {"Show Planets Sorted by Mass", showSortedPlanetsByMass}}
+
     };
 
-    unsigned choice = 0;
+    int choice = 0;
+    for(const auto& item : menu){
+        cout<<"Task "<<item.first<<". "<<item.second.title<<endl;
+    }
+    cout<<"0.Exit"<<endl;
     while (true) {
-        std::cout << "\nMenu:\n";
-        for (const auto& item : menu) {
-            std::cout << item.first << ". " << item.second.first << "\n";
-        }
-        std::cout << "0. Exit\n";
-        std::cout << "Enter choice: ";
-        std::cin >> choice;
-
+        EnterNumber(choice, "Введите номер пункта: ")();
         if (choice == 0) {
-            std::cout << "Exiting program.\n";
+            std::cout << " 2025 Ismailov Agafendi" << std::endl;
             break;
         }
-
+        cout << endl << " ============Action===========" << endl;
         if (menu.find(choice) != menu.end()) {
-            menu[choice].second();
-        } else {
-            std::cout << "Invalid choice.\n";
+            menu[choice].action();
         }
+        else
+        {
+            std::cout << "Некорректный ввод.";
+        }
+        std::cout << std::endl;
     }
-
+    
     return 0;
 }

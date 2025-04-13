@@ -1,50 +1,55 @@
 #ifndef ISMAILOV_LR34_PLANET_H
 #define ISMAILOV_LR34_PLANET_H
-
+#include <iostream>
 #include <string>
 #include <vector>
-#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <functional>
+
+using namespace std;
 
 class Planet {
 private:
-    std::string name;                
-    double mass;                     
-    double radius;                 
-    std::vector<std::string> researchDates; 
+    string name;           
+    int mass;              
+    int radius;            
+    vector<int> researchYears; 
 
 public:
-    
-    Planet(); 
-    Planet(const std::string& name, double mass, double radius, const std::vector<std::string>& dates); 
-    Planet(const Planet& other); 
-    Planet(double mass); 
-    Planet(const std::string& name, double mass, double radius); 
-    
-    std::string getName() const { return name; }
-    void setName(const std::string& name) { this->name = name; }
-    double getMass() const { return mass; }
-    void setMass(double mass) { this->mass = mass; }
-    double getRadius() const { return radius; }
-    void setRadius(double radius) { this->radius = radius; }
-    std::vector<std::string> getResearchDates() const { return researchDates; }
-    void setResearchDates(const std::vector<std::string>& dates) { researchDates = dates; }
+    // Конструкторы
+    Planet() : name("Unknown"), mass(0), radius(0) {} // По умолчанию
+    Planet(string n, int m, int r) : name(n), mass(m), radius(r) {} // Параметризованный
+    Planet(string n, int m, int r, vector<int> years) : name(n), mass(m), radius(r), researchYears(years) {} // С годами
+    Planet(const Planet& other) : name(other.name), mass(other.mass), radius(other.radius), researchYears(other.researchYears) {} // Копирования
+    Planet(int m) : name("Converted"), mass(m), radius(0) {} // Преобразования из массы
+
+   
+    void setName(const string& n) { name = n; }
+    void setMass(int m) { mass = m; }
+    void setRadius(int r) { radius = r; }
+    void setResearchYears(const vector<int>& years) { researchYears = years; }
 
     
-    double calculateGravity() const; 
-    void display() const; 
-    void input(); 
+    string getName() const { return name; }
+    int getMass() const { return mass; }
+    int getRadius() const { return radius; }
+    vector<int> getResearchYears() const { return researchYears; }
+
     
-    bool operator<(const Planet& other) const;
-    bool operator>(const Planet& other) const;
-    bool operator==(const Planet& other) const;
+    static Planet* input(); 
+    void show() const;      
+    double calcGravity() const; 
+
+    
+    bool operator<(const Planet& other) const { return mass < other.mass; }
     Planet operator+(const Planet& other) const;
-    Planet& operator++(); // Префиксный инкремент
-    Planet operator++(int); // Постфиксный инкремент
+    Planet& operator++();          // Префиксный инкремент
+    Planet operator++(int);        // Постфиксный инкремент
     Planet& operator=(const Planet& other);
+    friend ostream& operator<<(ostream& os, const Planet& p);
+    friend istream& operator>>(istream& is, Planet& p);
 
-    
-    friend std::ostream& operator<<(std::ostream& os, const Planet& planet);
-    friend std::istream& operator>>(std::istream& is, Planet& planet);
+    ~Planet() = default;
 };
-
 #endif 
